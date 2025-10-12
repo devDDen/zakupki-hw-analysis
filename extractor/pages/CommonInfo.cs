@@ -30,8 +30,8 @@ public class CommonInfo
             var sections = block.FindElements(By.ClassName("blockInfo__section"));
             foreach (var section in sections)
             {
-                var sectionTitle = GetSectionTitle(section);
-                var sectionInfo = GetSectionInfo(section);
+                var sectionTitle = Utils.GetSectionTitle(section);
+                var sectionInfo = Utils.GetSectionInfo(section);
 
                 if (sectionTitle == null || sectionInfo == null)
                 {
@@ -146,29 +146,5 @@ public class CommonInfo
         }
 
         return array;
-    }
-
-    static IWebElement? GetSectionTitle(IWebElement parent)
-    {
-        try
-        {
-            return parent.FindElement(By.ClassName("section__title"));
-        }
-        catch (NoSuchElementException)
-        {
-            return null;
-        }
-    }
-
-    static IWebElement? GetSectionInfo(IWebElement parent)
-    {
-        try
-        {
-            return parent.FindElement(By.ClassName("section__info"));
-        }
-        catch (NoSuchElementException)
-        {
-            return null;
-        }
     }
 }

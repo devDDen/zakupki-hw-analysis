@@ -48,4 +48,28 @@ public class Utils
 
         throw new InvalidOperationException($"Error after {tries} tries: {lastException}");
     }
+
+    public static IWebElement? GetSectionTitle(IWebElement parent)
+    {
+        try
+        {
+            return parent.FindElement(By.ClassName("section__title"));
+        }
+        catch (NoSuchElementException)
+        {
+            return null;
+        }
+    }
+
+    public static IWebElement? GetSectionInfo(IWebElement parent)
+    {
+        try
+        {
+            return parent.FindElement(By.ClassName("section__info"));
+        }
+        catch (NoSuchElementException)
+        {
+            return null;
+        }
+    }
 }
