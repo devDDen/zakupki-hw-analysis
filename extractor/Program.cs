@@ -25,14 +25,9 @@ class Program
 
         driver.Quit();
 
-        var encoderSettings = new TextEncoderSettings();
-        encoderSettings.AllowRange(UnicodeRanges.BasicLatin);
-        encoderSettings.AllowRange(UnicodeRanges.Cyrillic);
-        encoderSettings.AllowRange(UnicodeRanges.MathematicalOperators);
-
         var options = new JsonSerializerOptions
         {
-            Encoder = JavaScriptEncoder.Create(encoderSettings)
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 
         string output = JsonSerializer.Serialize(json, options);
