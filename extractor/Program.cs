@@ -18,6 +18,11 @@ class Program
 
         var json = Utils.ExecuteWithRetry(() => CommonInfo.GrabCommonInfo(driver, id));
 
+        if (json["stage"]?.GetValue<string?>()?.Equals("Определение поставщика завершено") ?? false)
+        {
+            json["auction_info"] = Utils.ExecuteWithRetry(() => SupplierResults.GrabSupplierResults(driver, id));
+        }
+
         driver.Quit();
 
         var encoderSettings = new TextEncoderSettings();
