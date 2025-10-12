@@ -92,66 +92,76 @@ public class CommonInfo
     {
         var array = new JsonArray();
 
-        var trs = block.FindElements(By.CssSelector("#positionKTRU div[id^=purchaseObjectTruTable] > .blockInfo__table > .tableBlock__body > tr"));
+        var rows = block.FindElements(By.CssSelector("#positionKTRU div[id^=purchaseObjectTruTable] > .blockInfo__table > .tableBlock__body > tr"));
 
-        for (int i = 0; i < trs.Count; ++i)
+        var prevProduct = new JsonObject();
+        foreach (var row in rows)
         {
-            var productInfo = trs[i];
-
-            var productJson = new JsonObject();
-            var columns = productInfo.FindElements(By.ClassName("tableBlock__col"));
-            productJson["code"] = columns[1].Text;
-            productJson["name"] = columns[2].Text;
-            productJson["units"] = columns[3].Text;
-            productJson["count"] = columns[4].Text;
-            productJson["price"] = columns[5].Text;
-            productJson["cost"] = columns[6].Text;
-
-            if (i + 1 >= trs.Count || !trs[i + 1].GetAttribute("class")!.StartsWith("truInfo_"))
+            if (row.GetAttribute("class")!.StartsWith("truInfo_"))
             {
-                productJson["specifications"] = new JsonArray();
-                array.Add(productJson);
+                prevProduct["specifications"] = ParseSpecification(row);
                 continue;
             }
 
-            var productSpec = trs[++i];
-            var productSpecifications = new JsonArray();
-            var specRows = productSpec.FindElements(By.CssSelector(".tableBlock__col table > tbody > tr"));
-
-            string prevName = "first";
-            foreach (var spec in specRows)
+            var productJson = new JsonObject();
+            try
             {
-                var specification = new JsonObject();
-                var specCols = spec.FindElements(By.CssSelector("td"));
-
-                if (specCols.Count == 0)
-                {
-                    continue;
-                }
-
-                var specColsText = specCols.Select(el => Utils.GetText(el)).ToList();
-                if (specCols.Count == 1)
-                {
-                    specification["name"] = prevName;
-                    specification["value"] = specColsText[0];
-                }
-                else
-                {
-                    prevName = specColsText[0];
-                    specification["name"] = specColsText[0];
-                    specification["value"] = specColsText[1];
-                    if (!string.IsNullOrEmpty(specColsText[2]))
-                    {
-                        specification["units"] = specColsText[2];
-                    }
-                }
-
-                productSpecifications.Add(specification);
+                var columns = row.FindElements(By.ClassName("tableBlock__col"));
+                productJson["code"] = columns[1].Text;
+                productJson["name"] = columns[2].Text;
+                productJson["units"] = columns[3].Text;
+                productJson["count"] = columns[4].Text;
+                productJson["price"] = columns[5].Text;
+                productJson["cost"] = columns[6].Text;
             }
-            productJson["specifications"] = productSpecifications;
+            catch (ArgumentOutOfRangeException)
+            {
+                continue;
+            }
+
+            prevProduct = productJson;
             array.Add(productJson);
         }
 
         return array;
+    }
+
+    static JsonArray ParseSpecification(IWebElement productSpec)
+    {
+        var productSpecifications = new JsonArray();
+        var specRows = productSpec.FindElements(By.CssSelector(".tableBlock__col table > tbody > tr"));
+
+        string prevName = "first";
+        foreach (var spec in specRows)
+        {
+            var specification = new JsonObject();
+            var specCols = spec.FindElements(By.CssSelector("td"));
+
+            if (specCols.Count == 0)
+            {
+                continue;
+            }
+
+            var specColsText = specCols.Select(el => Utils.GetText(el)).ToList();
+            if (specCols.Count == 1)
+            {
+                specification["name"] = prevName;
+                specification["value"] = specColsText[0];
+            }
+            else
+            {
+                prevName = specColsText[0];
+                specification["name"] = specColsText[0];
+                specification["value"] = specColsText[1];
+                if (!string.IsNullOrEmpty(specColsText[2]))
+                {
+                    specification["units"] = specColsText[2];
+                }
+            }
+
+            productSpecifications.Add(specification);
+        }
+
+        return productSpecifications;
     }
 }
