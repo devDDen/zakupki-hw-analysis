@@ -94,10 +94,9 @@ public class CommonInfo
 
         var trs = block.FindElements(By.CssSelector("#positionKTRU div[id^=purchaseObjectTruTable] > .blockInfo__table > .tableBlock__body > tr"));
 
-        foreach (var product in trs.Chunk(2))
+        for (int i = 0; i < trs.Count; ++i)
         {
-            var productInfo = product[0];
-            var productSpec = product[1];
+            var productInfo = trs[i];
 
             var productJson = new JsonObject();
             var columns = productInfo.FindElements(By.ClassName("tableBlock__col"));
@@ -108,6 +107,14 @@ public class CommonInfo
             productJson["price"] = columns[5].Text;
             productJson["cost"] = columns[6].Text;
 
+            if (i + 1 >= trs.Count || !trs[i + 1].GetAttribute("class")!.StartsWith("truInfo_"))
+            {
+                productJson["specifications"] = new JsonArray();
+                array.Add(productJson);
+                continue;
+            }
+
+            var productSpec = trs[++i];
             var productSpecifications = new JsonArray();
             var specRows = productSpec.FindElements(By.CssSelector(".tableBlock__col table > tbody > tr"));
 
