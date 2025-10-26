@@ -1,7 +1,8 @@
 ﻿using System.CommandLine;
+using System.Diagnostics;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Unicode;
 using OpenQA.Selenium.Chrome;
 using zakupki_extractor.pages;
 
@@ -50,8 +51,18 @@ class Program
         }
     }
 
+    static void Search(string query, string workdir, string? publishDate)
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // For Windows-1251 encoding support
+
+        using var searcher = new Searcher(workdir);
+        searcher.Search(query, publishDate, retries: 3);
+    }
+
     static int Main(string[] args)
     {
+        Trace.Listeners.Add(new ConsoleTraceListener());
+
         Option<string> idOption = new("--id")
         {
             Description = "Reg number.",
@@ -92,6 +103,51 @@ class Program
             }
 
             GrabInfo(id, outdir);
+        });
+
+        Option<string> queryOption = new("--query")
+        {
+            Description = "Query to search.",
+            Required = true,
+        };
+
+        Option<string> workdirOption = new("--workdir")
+        {
+            Description = "Directory to store downloaded files.",
+            Required = true,
+        };
+
+        Option<string> fromPublishDateOption = new("--from-publish-date")
+        {
+            Description = "Publish date to start search in dd.mm.yyyy format.",
+            DefaultValueFactory = parseResult => null!,
+        };
+
+        Command searchCommand = new("search", "Search ids by query")
+        {
+            queryOption,
+            workdirOption,
+            fromPublishDateOption,
+        };
+        rootCommand.Add(searchCommand);
+
+        searchCommand.SetAction(parseResult =>
+        {
+            var query = parseResult.GetRequiredValue(queryOption);
+            var workdir = parseResult.GetRequiredValue(workdirOption);
+            var publishDate = parseResult.GetValue(fromPublishDateOption);
+
+            try
+            {
+                workdir = Path.GetFullPath(workdir);
+                Directory.CreateDirectory(workdir);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
+            }
+
+            Search(query, workdir, publishDate);
         });
 
         return rootCommand.Parse(args).Invoke();
