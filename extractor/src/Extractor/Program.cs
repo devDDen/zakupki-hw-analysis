@@ -4,9 +4,9 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using OpenQA.Selenium.Chrome;
-using zakupki_extractor.pages;
+using Extractor.pages;
 
-namespace zakupki_extractor;
+namespace Extractor;
 
 class Program
 {

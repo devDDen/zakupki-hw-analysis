@@ -5,9 +5,9 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
 using OpenQA.Selenium.Chrome;
-using zakupki_extractor.pages;
+using Extractor.pages;
 
-namespace zakupki_extractor;
+namespace Extractor;
 
 public class Searcher : IDisposable
 {
