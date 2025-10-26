@@ -1,6 +1,6 @@
 using OpenQA.Selenium;
 
-namespace zakupki_extractor;
+namespace Extractor;
 
 public class Utils
 {

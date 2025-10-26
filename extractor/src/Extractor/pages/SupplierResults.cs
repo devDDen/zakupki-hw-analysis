@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using OpenQA.Selenium;
 
-namespace zakupki_extractor.pages;
+namespace Extractor.pages;
 
 public class SupplierResults
 {

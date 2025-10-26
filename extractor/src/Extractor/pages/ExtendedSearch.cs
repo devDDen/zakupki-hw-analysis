@@ -3,8 +3,8 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 
-[assembly: InternalsVisibleTo("zakupki_extractor.Tests")]
-namespace zakupki_extractor.pages;
+[assembly: InternalsVisibleTo("Extractor.Tests")]
+namespace Extractor.pages;
 
 public partial class ExtendedSearch
 {

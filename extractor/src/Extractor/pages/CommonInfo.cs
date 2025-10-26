@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using OpenQA.Selenium;
 
-namespace zakupki_extractor.pages;
+namespace Extractor.pages;
 
 public class CommonInfo
 {
