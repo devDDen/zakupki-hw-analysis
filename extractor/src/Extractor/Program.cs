@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using CsvHelper;
+using Extractor.FileStorageProvider;
 
 namespace Extractor;
 
@@ -16,6 +19,7 @@ class Program
         var options = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true
         };
 
         string output = JsonSerializer.Serialize(json, options);
@@ -46,6 +50,53 @@ class Program
         searcher.Search(query, publishDate, retries);
     }
 
+    static void GrabAll(string input, OutFormat outformat, string outdir, int retries)
+    {
+        using var grabber = new Grabber(outdir);
+
+        var options = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+        using IFileStorageProvider fileStorageProvider = outformat switch
+        {
+            OutFormat.files => new DirectoryFileStorageProvider(outdir),
+            OutFormat.zip => new ZipFileStorageProvider(Path.Combine(outdir, "archive.zip")),
+            _ => throw new ArgumentException("Ivalid format option"),
+        };
+        using var inputReader = new StreamReader(input);
+        using var csvReader = new CsvReader(inputReader, Searcher.CsvCfg);
+        var records = csvReader.GetRecords<Searcher.CsvData>();
+        foreach (var record in records)
+        {
+            var id = record.Id.Substring(1); // skip first № symbol
+
+            Debug.WriteLine($"Process id: {id}");
+
+            JsonObject json;
+            try
+            {
+                json = grabber.GrabInfo(id, retries);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fail to process id: {id}. {ex.Message}");
+                Console.Error.WriteLine($"Fail to process id: {id}");
+                continue;
+            }
+
+            string output = JsonSerializer.Serialize(json, options);
+
+            fileStorageProvider.Store($"{id}.json", output);
+        }
+    }
+
+    public enum OutFormat
+    {
+        files,
+        zip,
+    }
+
     static int Main(string[] args)
     {
         Trace.Listeners.Add(new ConsoleTraceListener());
@@ -56,7 +107,7 @@ class Program
             Required = true,
         };
 
-        Option<string> outdirOption = new("--outdir")
+        Option<string> outdirOrStdoutOption = new("--outdir")
         {
             Description = "Out directory or 'stdout'.",
             DefaultValueFactory = parseResult => "stdout",
@@ -73,7 +124,7 @@ class Program
         Command grabCommand = new("grab", "Get info from zakupki.gov.ru by id")
         {
             idOption,
-            outdirOption,
+            outdirOrStdoutOption,
             retriesOption,
         };
         rootCommand.Add(grabCommand);
@@ -81,8 +132,8 @@ class Program
         grabCommand.SetAction(parseResult =>
         {
             var id = parseResult.GetRequiredValue(idOption);
-            var outdir = parseResult.GetRequiredValue(outdirOption);
-            var retries = parseResult.GetValue(retriesOption);
+            var outdir = parseResult.GetRequiredValue(outdirOrStdoutOption);
+            var retries = parseResult.GetRequiredValue(retriesOption);
 
             if (outdir != "stdout")
             {
@@ -145,6 +196,61 @@ class Program
             }
 
             Search(query, workdir, publishDate, retries);
+        });
+
+        Option<string> inputCSVOption = new("--input")
+        {
+            Description = "Path to merged.csv.",
+            Required = true,
+        };
+
+        Option<OutFormat> outformatOption = new("--outformat")
+        {
+            Description = "Output format.",
+            Required = true,
+        };
+
+        Option<string> outdirOption = new("--outdir")
+        {
+            Description = "Out directory.",
+            Required = true,
+        };
+
+        Command grabAllCommand = new("grab-all", "Get info by ids from csv (after search)")
+        {
+            inputCSVOption,
+            outformatOption,
+            outdirOption,
+            retriesOption,
+        };
+        rootCommand.Add(grabAllCommand);
+
+        grabAllCommand.SetAction(parseResult =>
+        {
+            var input = parseResult.GetRequiredValue(inputCSVOption);
+            var outformat = parseResult.GetRequiredValue(outformatOption);
+            var outdir = parseResult.GetRequiredValue(outdirOption);
+            var retries = parseResult.GetValue(retriesOption);
+
+            if (!File.Exists(input))
+            {
+                Console.WriteLine($"File {input} is not exists");
+                return 1;
+            }
+
+            outdir = Path.GetFullPath(outdir);
+            try
+            {
+                Directory.CreateDirectory(outdir);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
+                return 1;
+            }
+
+            GrabAll(input, outformat, outdir, retries);
+            return 0;
         });
 
         return rootCommand.Parse(args).Invoke();
