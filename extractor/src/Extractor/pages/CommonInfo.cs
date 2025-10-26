@@ -5,16 +5,16 @@ namespace Extractor.pages;
 
 public class CommonInfo
 {
+    public static void GoToCommonInfo(IWebDriver driver, string id)
+    {
+        var uri = new UriBuilder($"https://zakupki.gov.ru/epz/order/notice/ea20/view/common-info.html?regNumber={id}");
+        driver.Navigate().GoToUrl(uri.ToString());
+    }
+
     public static JsonObject GrabCommonInfo(IWebDriver driver, string id)
     {
         var json = new JsonObject();
         json["id"] = id;
-
-        var uri = new UriBuilder($"https://zakupki.gov.ru/epz/order/notice/ea20/view/common-info.html?regNumber={id}");
-        driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(5000);
-        driver.Navigate().GoToUrl(uri.ToString());
-        Utils.SSLCertPopupClose(driver);
-        driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(50);
 
         var blocks = driver.FindElements(By.CssSelector(".container .blockInfo .col"));
         foreach (var block in blocks)

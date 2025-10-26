@@ -3,28 +3,15 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using OpenQA.Selenium.Chrome;
-using Extractor.pages;
 
 namespace Extractor;
 
 class Program
 {
-    static void GrabInfo(string id, string outdir)
+    static void GrabInfo(string id, string outdir, int retries)
     {
-        var op = new ChromeOptions();
-        op.AddArgument("--headless");
-
-        var driver = new ChromeDriver(options: op);
-
-        var json = Utils.ExecuteWithRetry(() => CommonInfo.GrabCommonInfo(driver, id));
-
-        if (json["stage"]?.GetValue<string?>()?.Equals("Определение поставщика завершено") ?? false)
-        {
-            json["auction_info"] = Utils.ExecuteWithRetry(() => SupplierResults.GrabSupplierResults(driver, id));
-        }
-
-        driver.Quit();
+        using var grabber = new Grabber(outdir);
+        var json = grabber.GrabInfo(id, retries);
 
         var options = new JsonSerializerOptions
         {
@@ -51,12 +38,12 @@ class Program
         }
     }
 
-    static void Search(string query, string workdir, string? publishDate)
+    static void Search(string query, string workdir, string? publishDate, int retries)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // For Windows-1251 encoding support
 
         using var searcher = new Searcher(workdir);
-        searcher.Search(query, publishDate, retries: 3);
+        searcher.Search(query, publishDate, retries);
     }
 
     static int Main(string[] args)
@@ -75,12 +62,19 @@ class Program
             DefaultValueFactory = parseResult => "stdout",
         };
 
+        Option<int> retriesOption = new("--retries")
+        {
+            Description = "Number or retries with exponential delay.",
+            DefaultValueFactory = parseResult => 3,
+        };
+
         RootCommand rootCommand = new("zakupki.gov.ru parser");
 
         Command grabCommand = new("grab", "Get info from zakupki.gov.ru by id")
         {
             idOption,
             outdirOption,
+            retriesOption,
         };
         rootCommand.Add(grabCommand);
 
@@ -88,6 +82,7 @@ class Program
         {
             var id = parseResult.GetRequiredValue(idOption);
             var outdir = parseResult.GetRequiredValue(outdirOption);
+            var retries = parseResult.GetValue(retriesOption);
 
             if (outdir != "stdout")
             {
@@ -102,7 +97,7 @@ class Program
                 }
             }
 
-            GrabInfo(id, outdir);
+            GrabInfo(id, outdir, retries);
         });
 
         Option<string> queryOption = new("--query")
@@ -117,10 +112,10 @@ class Program
             Required = true,
         };
 
-        Option<string> fromPublishDateOption = new("--from-publish-date")
+        Option<string?> fromPublishDateOption = new("--from-publish-date")
         {
             Description = "Publish date to start search in dd.mm.yyyy format.",
-            DefaultValueFactory = parseResult => null!,
+            DefaultValueFactory = parseResult => null,
         };
 
         Command searchCommand = new("search", "Search ids by query")
@@ -128,6 +123,7 @@ class Program
             queryOption,
             workdirOption,
             fromPublishDateOption,
+            retriesOption,
         };
         rootCommand.Add(searchCommand);
 
@@ -136,6 +132,7 @@ class Program
             var query = parseResult.GetRequiredValue(queryOption);
             var workdir = parseResult.GetRequiredValue(workdirOption);
             var publishDate = parseResult.GetValue(fromPublishDateOption);
+            var retries = parseResult.GetValue(retriesOption);
 
             try
             {
@@ -147,7 +144,7 @@ class Program
                 Console.WriteLine($"{ex.Message}");
             }
 
-            Search(query, workdir, publishDate);
+            Search(query, workdir, publishDate, retries);
         });
 
         return rootCommand.Parse(args).Invoke();
