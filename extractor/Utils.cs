@@ -49,6 +49,35 @@ public class Utils
         throw new InvalidOperationException($"Error after {tries} tries: {lastException}");
     }
 
+    public static void ExecuteWithRetry(Action func, int numberOfRetries = 1)
+    {
+        int tries = 0;
+        var retryInterval = new TimeSpan(0, 0, 1);
+
+        Exception? lastException = null;
+
+        do
+        {
+            try
+            {
+                if (tries > 0)
+                {
+                    Thread.Sleep(retryInterval);
+                }
+                func();
+                return;
+            }
+            catch (Exception e)
+            {
+                lastException = e;
+                tries++;
+                retryInterval *= 2;
+            }
+        } while (tries < numberOfRetries);
+
+        throw new InvalidOperationException($"Error after {tries} tries: {lastException}");
+    }
+
     public static IWebElement? GetSectionTitle(IWebElement parent)
     {
         try
