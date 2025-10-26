@@ -14,7 +14,7 @@ public class Searcher : IDisposable
     private ChromeDriver Driver { get; init; }
     private string Workdir { get; init; }
     private string Outdir { get; init; }
-    private static readonly CsvConfiguration CsvCfg = new(CultureInfo.InvariantCulture)
+    public static readonly CsvConfiguration CsvCfg = new(CultureInfo.InvariantCulture)
     {
         Delimiter = ";",
         NewLine = Environment.NewLine,
