@@ -22,14 +22,14 @@ public class SupplierResults
         public required string Bid { get; set; }
     }
 
-    public static JsonNode GrabSupplierResults(IWebDriver driver, string id)
+    public static void GoToSupplierResults(IWebDriver driver, string id)
     {
         var uri = new UriBuilder($"https://zakupki.gov.ru/epz/order/notice/ea20/view/supplier-results.html?regNumber={id}");
-        driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(5000);
         driver.Navigate().GoToUrl(uri.ToString());
-        Utils.SSLCertPopupClose(driver);
-        driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(50);
+    }
 
+    public static JsonNode GrabSupplierResults(IWebDriver driver)
+    {
         var (auctionInfo, protocolUri) = GetInfo(driver);
         auctionInfo.Participants = GetParticipants(driver);
 
