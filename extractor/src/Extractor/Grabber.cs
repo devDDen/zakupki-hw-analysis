@@ -8,14 +8,11 @@ namespace Extractor;
 public class Grabber : IDisposable
 {
     private ChromeDriver Driver { get; init; }
-    private string Outdir { get; init; }
 
-    public Grabber(string outdir)
+    public Grabber()
     {
         var op = new ChromeOptions();
         op.AddArgument("--headless");
-
-        Outdir = outdir;
 
         Driver = new ChromeDriver(options: op);
 

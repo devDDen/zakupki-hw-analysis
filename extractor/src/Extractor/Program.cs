@@ -13,7 +13,7 @@ class Program
 {
     static void GrabInfo(string id, string outdir, int retries)
     {
-        using var grabber = new Grabber(outdir);
+        using var grabber = new Grabber();
         var json = grabber.GrabInfo(id, retries);
 
         var options = new JsonSerializerOptions
@@ -52,7 +52,7 @@ class Program
 
     static void GrabAll(string input, OutFormat outformat, string outdir, int retries)
     {
-        using var grabber = new Grabber(outdir);
+        using var grabber = new Grabber();
 
         var options = new JsonSerializerOptions
         {
