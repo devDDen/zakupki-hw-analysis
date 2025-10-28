@@ -148,15 +148,19 @@ public class CommonInfo
                 specification["name"] = prevName;
                 specification["value"] = specColsText[0];
             }
-            else
+            else if (specCols.Count >= 2)
             {
                 prevName = specColsText[0];
                 specification["name"] = specColsText[0];
                 specification["value"] = specColsText[1];
-                if (!string.IsNullOrEmpty(specColsText[2]))
+                if (!string.IsNullOrEmpty(specColsText.ElementAtOrDefault(2)))
                 {
                     specification["units"] = specColsText[2];
                 }
+            }
+            else
+            {
+                continue;
             }
 
             productSpecifications.Add(specification);
