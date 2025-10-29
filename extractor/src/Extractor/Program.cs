@@ -56,6 +56,7 @@ class Program
             GrabInfoOptions.OutformatOption,
             GrabInfoOptions.OutdirOption,
             CommonOptions.RetriesOption,
+            GrabInfoOptions.ParallelJobsOption,
         };
         rootCommand.Add(grabAllCommand);
 
@@ -65,8 +66,9 @@ class Program
             var outformat = parseResult.GetRequiredValue(GrabInfoOptions.OutformatOption);
             var outdir = parseResult.GetRequiredValue(GrabInfoOptions.OutdirOption);
             var retries = parseResult.GetRequiredValue(CommonOptions.RetriesOption);
+            var jobs = parseResult.GetRequiredValue(GrabInfoOptions.ParallelJobsOption);
 
-            return ExtractorCLI.RunGrabAllCmd(input, outformat, outdir, retries);
+            return ExtractorCLI.RunGrabAllCmd(input, outformat, outdir, retries, jobs);
         });
 
         return rootCommand.Parse(args).Invoke();

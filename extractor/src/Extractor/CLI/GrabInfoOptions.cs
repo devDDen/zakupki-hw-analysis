@@ -40,4 +40,10 @@ internal class GrabInfoOptions
         Description = "Path to merged.csv.",
         Required = true,
     };
+
+    internal static Option<int> ParallelJobsOption = new("-j")
+    {
+        Description = "Jobs count to run in parallel.",
+        DefaultValueFactory = parseResult => 1,
+    };
 }
