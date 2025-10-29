@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using OpenQA.Selenium;
 
 namespace Extractor;
@@ -34,12 +35,14 @@ public class Utils
             {
                 if (tries > 0)
                 {
+                    Debug.WriteLine($"Retry {tries}, wait {retryInterval}s");
                     Thread.Sleep(retryInterval);
                 }
                 return func();
             }
             catch (Exception e)
             {
+                Debug.WriteLine($"Retry got an exception {e.Message}");
                 lastException = e;
                 tries++;
                 retryInterval *= 2;
@@ -62,6 +65,7 @@ public class Utils
             {
                 if (tries > 0)
                 {
+                    Debug.WriteLine($"Retry {tries}, wait {retryInterval}s");
                     Thread.Sleep(retryInterval);
                 }
                 func();
@@ -69,6 +73,7 @@ public class Utils
             }
             catch (Exception e)
             {
+                Debug.WriteLine($"Retry got an exception {e.Message}");
                 lastException = e;
                 tries++;
                 retryInterval *= 2;
