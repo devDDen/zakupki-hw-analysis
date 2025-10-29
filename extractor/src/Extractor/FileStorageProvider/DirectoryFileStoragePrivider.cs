@@ -1,4 +1,4 @@
-using Extractor.FileStorageProvider;
+namespace Extractor.FileStorageProvider;
 
 class DirectoryFileStorageProvider(string basepath) : IFileStorageProvider
 {
