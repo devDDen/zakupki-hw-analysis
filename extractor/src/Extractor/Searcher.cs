@@ -50,7 +50,7 @@ public class Searcher : IDisposable
         Utils.SSLCertPopupClose(Driver);
     }
 
-    public void Search(string query, string? publishDateFrom = null, int retries = 1)
+    public void SearchAndMakeCsv(string query, string? publishDateFrom = null, int retries = 1)
     {
         bool hasMore;
         string? publishDate = publishDateFrom;

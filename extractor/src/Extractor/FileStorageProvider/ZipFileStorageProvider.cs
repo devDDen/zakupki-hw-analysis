@@ -1,17 +1,27 @@
 
 using System.IO.Compression;
-using Extractor.FileStorageProvider;
+
+namespace Extractor.FileStorageProvider;
 
 class ZipFileStorageProvider : IFileStorageProvider, IDisposable
 {
     private ZipArchive Archive { get; init; }
     private CompressionLevel CompressionLevel { get; init; }
+    public bool Overwrite { get; set; }
 
-    public ZipFileStorageProvider(string archivePath, CompressionLevel compressionLevel = CompressionLevel.Optimal)
+    public ZipFileStorageProvider(string archivePath, CompressionLevel compressionLevel = CompressionLevel.Optimal, bool overwrite = false)
     {
-        var writer = File.Create(archivePath);
-        Archive = new ZipArchive(writer, ZipArchiveMode.Create);
         CompressionLevel = compressionLevel;
+        Overwrite = overwrite;
+
+        if (!overwrite && File.Exists(archivePath))
+        {
+            Archive = new ZipArchive(File.Open(archivePath, FileMode.Open, FileAccess.ReadWrite), ZipArchiveMode.Update);
+        }
+        else
+        {
+            Archive = new ZipArchive(File.Create(archivePath), ZipArchiveMode.Create);
+        }
     }
 
     public void Dispose()
