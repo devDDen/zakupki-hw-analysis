@@ -6,7 +6,7 @@ namespace Extractor.CLI;
 
 internal partial class ExtractorCLI
 {
-    public static int RunGrabAllCmd(string inputCsv, OutFormat outformat, string outdir, int retries)
+    public static int RunGrabAllCmd(string inputCsv, OutFormat outformat, string outdir, int retries, int jobs)
     {
         if (!File.Exists(inputCsv))
         {
@@ -37,7 +37,14 @@ internal partial class ExtractorCLI
 
         try
         {
-            GrabInfoAllCmd(inputCsv, outformat, outdir, retries);
+            if (jobs > 1)
+            {
+                GrabInfoThreaded(jobs, inputCsv, outformat, outdir, retries);
+            }
+            else
+            {
+                GrabInfoAllCmd(inputCsv, outformat, outdir, retries);
+            }
         }
         catch (Exception ex)
         {
