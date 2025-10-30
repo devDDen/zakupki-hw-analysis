@@ -71,7 +71,11 @@ internal class GrabInfoCommon
 
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(zipfile)!);
+            var dirname = Path.GetDirectoryName(zipfile);
+            if (!string.IsNullOrEmpty(dirname))
+            {
+                Directory.CreateDirectory(dirname);
+            }
             return Path.GetFullPath(zipfile);
         }
         catch (Exception ex)
