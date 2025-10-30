@@ -50,6 +50,25 @@ class Program
             return ExtractorCLI.RunSearchCmd(query, workdir, publishDate, retries);
         });
 
+        Command searchAllCommand = new("search-all", "Search ids by queries from file")
+        {
+            SearchOptions.QueryFileOption,
+            SearchOptions.WorkdirOption,
+            SearchOptions.FromPublishDateOption,
+            CommonOptions.RetriesOption,
+        };
+        rootCommand.Add(searchAllCommand);
+
+        searchAllCommand.SetAction(parseResult =>
+        {
+            var queryfile = parseResult.GetRequiredValue(SearchOptions.QueryFileOption);
+            var workdir = parseResult.GetRequiredValue(SearchOptions.WorkdirOption);
+            var publishDate = parseResult.GetValue(SearchOptions.FromPublishDateOption);
+            var retries = parseResult.GetRequiredValue(CommonOptions.RetriesOption);
+
+            return ExtractorCLI.RunSearchAllCmd(queryfile, workdir, publishDate, retries);
+        });
+
         Command grabAllCommand = new("grab-all", "Get info by ids from csv (after search)")
         {
             GrabInfoOptions.InputCSVOption,
