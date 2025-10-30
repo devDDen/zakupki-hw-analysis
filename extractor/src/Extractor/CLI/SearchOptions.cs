@@ -21,4 +21,10 @@ internal class SearchOptions
         Description = "Publish date to start search in dd.mm.yyyy format.",
         DefaultValueFactory = parseResult => null,
     };
+
+    internal static Option<string> QueryFileOption = new("--query-file")
+    {
+        Description = "File with queries separated by new line.",
+        Required = true,
+    };
 }
