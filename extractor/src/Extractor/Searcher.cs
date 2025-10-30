@@ -20,7 +20,7 @@ public class Searcher : IDisposable
         NewLine = Environment.NewLine,
     };
 
-    public class CsvData
+    public record CsvData
     {
         [Name("Реестровый номер закупки")]
         public required string Id { get; set; }

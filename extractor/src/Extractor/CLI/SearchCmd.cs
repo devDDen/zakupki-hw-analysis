@@ -1,5 +1,4 @@
 using System.Text;
-using Extractor.FileStorageProvider;
 
 namespace Extractor.CLI;
 
@@ -14,7 +13,7 @@ internal partial class ExtractorCLI
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"{ex.Message}");
+            Console.Error.WriteLine($"{ex.Message}");
             return 1;
         }
 

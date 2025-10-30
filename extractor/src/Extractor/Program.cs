@@ -71,6 +71,21 @@ class Program
             return ExtractorCLI.RunGrabAllCmd(input, outformat, outdir, retries, jobs);
         });
 
+        Command mergeCsvCommand = new("merge-csv", "Merge .csv files (after searches with defferent queries)")
+        {
+            MergeCsvOptions.OutOption,
+            MergeCsvOptions.InputOption,
+        };
+        rootCommand.Add(mergeCsvCommand);
+
+        mergeCsvCommand.SetAction(parseResult =>
+        {
+            string output = parseResult.GetRequiredValue(MergeCsvOptions.OutOption);
+            string[] input = parseResult.GetRequiredValue(MergeCsvOptions.InputOption);
+
+            return ExtractorCLI.RunMergeCsvCmd(output, input);
+        });
+
         return rootCommand.Parse(args).Invoke();
     }
 }
