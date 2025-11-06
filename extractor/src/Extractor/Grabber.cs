@@ -25,19 +25,25 @@ public class Grabber : IDisposable
 
     public JsonObject GrabInfo(string id, int retries = 1)
     {
-        Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-        Utils.ExecuteWithRetry(() => CommonInfo.GoToCommonInfo(Driver, id), retries);
+        var json = Utils.ExecuteWithRetry(() =>
+        {
+            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+            CommonInfo.GoToCommonInfo(Driver, id);
 
-        Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(50);
-        var json = Utils.ExecuteWithRetry(() => CommonInfo.GrabCommonInfo(Driver, id), retries);
+            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(50);
+            return CommonInfo.GrabCommonInfo(Driver, id);
+        }, retries);
 
         if (json["stage"]?.GetValue<string?>()?.Equals("Определение поставщика завершено") ?? false)
         {
-            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-            Utils.ExecuteWithRetry(() => SupplierResults.GoToSupplierResults(Driver, id), retries);
+            json["auction_info"] = Utils.ExecuteWithRetry(() =>
+            {
+                Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+                SupplierResults.GoToSupplierResults(Driver, id);
 
-            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(50);
-            json["auction_info"] = Utils.ExecuteWithRetry(() => SupplierResults.GrabSupplierResults(Driver), retries);
+                Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(50);
+                return SupplierResults.GrabSupplierResults(Driver);
+            }, retries);
         }
 
         return json;
