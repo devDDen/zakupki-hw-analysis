@@ -16,7 +16,7 @@ class ZipFileStorageProvider : IFileStorageProvider, IDisposable
 
         if (!overwrite && File.Exists(archivePath))
         {
-            Archive = new ZipArchive(File.Open(archivePath, FileMode.Open, FileAccess.ReadWrite), ZipArchiveMode.Update);
+            Archive = ZipFile.Open(archivePath, ZipArchiveMode.Update);
         }
         else
         {
