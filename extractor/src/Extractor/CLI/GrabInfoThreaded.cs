@@ -33,6 +33,8 @@ internal partial class ExtractorCLI
         var records = csvReader.GetRecords<Searcher.CsvData>();
         foreach (var record in records)
         {
+            if (ShouldStop) { break; }
+
             string id = record.Id.Substring(1); // skip first № symbol
 
             Debug.WriteLine($"Prepare id: {id}");
@@ -41,7 +43,8 @@ internal partial class ExtractorCLI
             ThreadPool.QueueUserWorkItem(contexts[freeThread].GrabId, id);
         }
 
-        WaitHandle.WaitAll(doneEvents);
+        var timeout = ShouldStop ? TimeSpan.FromSeconds(30) : Timeout.InfiniteTimeSpan;
+        WaitHandle.WaitAll(doneEvents, timeout);
 
         for (int i = 0; i < j; i++)
         {

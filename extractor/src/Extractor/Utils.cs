@@ -43,6 +43,10 @@ public class Utils
             catch (Exception e)
             {
                 Debug.WriteLine($"Retry got an exception {e.Message}");
+                if (e.Message.Contains("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))
+                {
+                    throw;
+                }
                 lastException = e;
                 tries++;
                 retryInterval *= 2;
@@ -74,6 +78,10 @@ public class Utils
             catch (Exception e)
             {
                 Debug.WriteLine($"Retry got an exception {e.Message}");
+                if (e.Message.Contains("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))
+                {
+                    throw;
+                }
                 lastException = e;
                 tries++;
                 retryInterval *= 2;

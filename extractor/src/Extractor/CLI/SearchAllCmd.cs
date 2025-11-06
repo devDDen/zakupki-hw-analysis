@@ -46,6 +46,8 @@ internal partial class ExtractorCLI
             var query = reader.ReadLine();
             if (string.IsNullOrEmpty(query)) { break; }
 
+	        Console.WriteLine($"Processing query: '{query}'");
+
             try
             {
                 i++;
@@ -62,7 +64,7 @@ internal partial class ExtractorCLI
                 Console.Error.WriteLine($"Fail to process query {query}: {ex.Message}");
             }
 
-        } while (true);
+        } while (!ShouldStop);
 
         var merger = new CsvMerger<Searcher.CsvData>(Searcher.CsvCfg);
 

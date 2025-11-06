@@ -8,6 +8,8 @@ class Program
 {
     static int Main(string[] args)
     {
+        Console.CancelKeyPress += OnExit;
+
         Trace.Listeners.Add(new ConsoleTraceListener());
 
         RootCommand rootCommand = new("zakupki.gov.ru parser");
@@ -106,5 +108,12 @@ class Program
         });
 
         return rootCommand.Parse(args).Invoke();
+    }
+
+    private static void OnExit(object? sender, ConsoleCancelEventArgs e)
+    {
+        Console.WriteLine("Graceful shutdown");
+        ExtractorCLI.Stop();
+        e.Cancel = true;
     }
 }
