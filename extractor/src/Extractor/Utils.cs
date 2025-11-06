@@ -106,4 +106,16 @@ public class Utils
             return null;
         }
     }
+
+    public static IWebElement? FindElement(IWebElement parent, By by)
+    {
+        try
+        {
+            return parent.FindElement(by);
+        }
+        catch (NoSuchElementException)
+        {
+            return null;
+        }
+    }
 }

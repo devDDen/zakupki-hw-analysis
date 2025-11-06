@@ -19,7 +19,8 @@ public class CommonInfo
         var blocks = driver.FindElements(By.CssSelector(".container .blockInfo .col"));
         foreach (var block in blocks)
         {
-            var title = block.FindElement(By.ClassName("blockInfo__title"));
+            var title = Utils.FindElement(block, By.ClassName("blockInfo__title"));
+            if (title == null) { continue; }
 
             if (title.Text == "Информация об объекте закупки")
             {
