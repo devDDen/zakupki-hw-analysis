@@ -14,7 +14,7 @@ internal class GrubInfoThreadedContext(SyncFileStorageProvider fileStorageProvid
 
     private void ProcessCounter()
     {
-        if (Counter >= 5000)
+        if (Counter >= 8000)
         {
             Grabber.Dispose();
             Grabber = new();
